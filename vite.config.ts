@@ -6,12 +6,14 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
+    // Supports root hosting (/) by default and GitHub Pages repository subpaths via VITE_BASE_PATH.
+    base: process.env.VITE_BASE_PATH || '/',
     plugins: [
       react(),
       tailwindcss(),
       // Copies src/assets into dist/ so root-relative URLs like
       // "/src/assets/images/..." (e.g. generate_image output) still resolve
-      // in production builds. Do not remove.
+      // in production builds, and writes GitHub Pages SPA fallback files (404.html, .nojekyll).
       {
         name: 'copy-unbundled-src-assets',
         apply: 'build',
@@ -24,6 +26,16 @@ export default defineConfig(() => {
           const distAssets = path.resolve(distDir, 'src/assets');
           if (fs.existsSync(distDir) && fs.existsSync(srcAssets)) {
             fs.cpSync(srcAssets, distAssets, {recursive: true, force: true});
+          }
+          // GitHub Pages static SPA fallback & Jekyll bypass
+          const indexHtml = path.join(distDir, 'index.html');
+          const fallback404 = path.join(distDir, '404.html');
+          const noJekyll = path.join(distDir, '.nojekyll');
+          if (fs.existsSync(indexHtml)) {
+            fs.copyFileSync(indexHtml, fallback404);
+          }
+          if (fs.existsSync(distDir) && !fs.existsSync(noJekyll)) {
+            fs.writeFileSync(noJekyll, '');
           }
         },
       },

@@ -6,6 +6,7 @@ export type NavigationView =
   | 'practice'
   | 'reader-preview'
   | 'vocabulary'
+  | 'notebook'
   | 'source-audit';
 
 export type ChapterKind = 'foundation' | 'lesson' | 'review' | 'reference';

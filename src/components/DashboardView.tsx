@@ -21,6 +21,7 @@ interface DashboardViewProps {
   onOpenLesson: (chapterNumber: number) => void;
   onOpenDialogues: () => void;
   onOpenPractice: (tab?: 'workbook' | 'assessments' | 'drills' | 'revision') => void;
+  onOpenNotebook: (tab?: 'progress' | 'notes' | 'bookmarks' | 'backup') => void;
   onOpenLearningPath: (unitId?: string) => void;
   onOpenVocabularyStudio: (tab?: 'database' | 'flashcards' | 'audio') => void;
   onOpenSourceAudit: () => void;
@@ -44,6 +45,7 @@ export function DashboardView({
   onOpenLesson,
   onOpenDialogues,
   onOpenPractice,
+  onOpenNotebook,
   onOpenLearningPath,
   onOpenVocabularyStudio,
   onOpenSourceAudit,
@@ -480,6 +482,13 @@ export function DashboardView({
                 <span className="inline-block h-2.5 w-2.5 rounded-xs border border-[var(--color-ochre)]/60 bg-[var(--color-paper-subtle)] dark:border-amber-500/50 dark:bg-[var(--color-night-subtle)]" />
                 Review chapter (12, 18, 24, 30, 36, 41)
               </span>
+              <button
+                type="button"
+                onClick={() => onOpenNotebook('progress')}
+                className="ml-auto font-sans text-xs font-medium text-[var(--color-prussian)] hover:underline dark:text-[#7AB3E6]"
+              >
+                Open Full Notebook &amp; Analytics →
+              </button>
             </div>
           </div>
         </div>
@@ -688,7 +697,7 @@ export function DashboardView({
             <div className="mt-4 flex items-center justify-between border-t border-[var(--color-hairline)] pt-3 text-xs dark:border-[var(--color-night-hairline)]">
               <span className="inline-flex items-center gap-1.5 text-[var(--color-ink-muted)] dark:text-slate-400">
                 <Clock className="h-3.5 w-3.5" />
-                Stages 1–8 active · Stage 9 Notebook &amp; Progress next
+                Stages 1–9 active · GitHub Actions Pages Ready
               </span>
               <button
                 type="button"

@@ -517,6 +517,96 @@ export function useStudyState() {
     []
   );
 
+  const exportStudyStateJson = useCallback((): string => {
+    return JSON.stringify(
+      {
+        schema: 'german-made-simple-study-backup-v1',
+        exportedAt: new Date().toISOString(),
+        state,
+      },
+      null,
+      2
+    );
+  }, [state]);
+
+  const importStudyStateJson = useCallback(
+    (rawJson: string): { ok: boolean; error?: string; summary?: string } => {
+      try {
+        const parsed = JSON.parse(rawJson) as {
+          schema?: string;
+          state?: Partial<UserStudyState>;
+        } & Partial<UserStudyState>;
+        const candidate: Partial<UserStudyState> =
+          parsed && typeof parsed === 'object' && parsed.state && typeof parsed.state === 'object'
+            ? parsed.state
+            : parsed;
+
+        if (!candidate || typeof candidate !== 'object') {
+          return { ok: false, error: 'Backup file does not contain a valid study state object.' };
+        }
+
+        const merged: UserStudyState = {
+          ...DEFAULT_STUDY_STATE,
+          lastChapterNumber:
+            typeof candidate.lastChapterNumber === 'number' ? candidate.lastChapterNumber : 1,
+          completedChapters: Array.isArray(candidate.completedChapters)
+            ? candidate.completedChapters.filter((n): n is number => typeof n === 'number')
+            : [],
+          inProgressChapters: Array.isArray(candidate.inProgressChapters)
+            ? candidate.inProgressChapters.filter((n): n is number => typeof n === 'number')
+            : [],
+          difficultChapters: Array.isArray(candidate.difficultChapters)
+            ? candidate.difficultChapters.filter((n): n is number => typeof n === 'number')
+            : [],
+          savedVocab: Array.isArray(candidate.savedVocab) ? candidate.savedVocab : [],
+          vocabProgress:
+            candidate.vocabProgress && typeof candidate.vocabProgress === 'object'
+              ? candidate.vocabProgress
+              : {},
+          exerciseProgress:
+            candidate.exerciseProgress && typeof candidate.exerciseProgress === 'object'
+              ? candidate.exerciseProgress
+              : {},
+          preferredGermanVoiceURI:
+            typeof candidate.preferredGermanVoiceURI === 'string'
+              ? candidate.preferredGermanVoiceURI
+              : null,
+          quizResults: Array.isArray(candidate.quizResults) ? candidate.quizResults : [],
+          studyHistory: Array.isArray(candidate.studyHistory) ? candidate.studyHistory : [],
+          chapterProgress:
+            candidate.chapterProgress && typeof candidate.chapterProgress === 'object'
+              ? candidate.chapterProgress
+              : {},
+          readerPreferences: {
+            ...DEFAULT_READER_PREFERENCES,
+            ...(candidate.readerPreferences || {}),
+          },
+          bookmarks: Array.isArray(candidate.bookmarks) ? candidate.bookmarks : [],
+          highlights: Array.isArray(candidate.highlights) ? candidate.highlights : [],
+          annotations: Array.isArray(candidate.annotations) ? candidate.annotations : [],
+          theme: candidate.theme === 'dark' ? 'dark' : 'light',
+        };
+
+        setState(merged);
+        return {
+          ok: true,
+          summary: `Restored ${merged.completedChapters.length} completed chapters, ${merged.savedVocab.length} saved words, ${merged.annotations.length} notes, and ${Object.keys(merged.exerciseProgress).length} exercise records.`,
+        };
+      } catch {
+        return { ok: false, error: 'Could not parse JSON backup file. Please select a valid backup.' };
+      }
+    },
+    []
+  );
+
+  const resetStudyProgress = useCallback(() => {
+    setState((prev) => ({
+      ...DEFAULT_STUDY_STATE,
+      theme: prev.theme,
+      preferredGermanVoiceURI: prev.preferredGermanVoiceURI,
+    }));
+  }, []);
+
   return {
     state,
     toggleTheme,
@@ -539,5 +629,8 @@ export function useStudyState() {
     recordQuizResult,
     recordExerciseAttempt,
     toggleExerciseNeedsReview,
+    exportStudyStateJson,
+    importStudyStateJson,
+    resetStudyProgress,
   };
 }

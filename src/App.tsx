@@ -6,6 +6,10 @@ import { InteractiveReaderView } from './components/InteractiveReaderView';
 import { LearningPathView } from './components/LearningPathView';
 import { LessonStudioView } from './components/LessonStudioView';
 import {
+  NotebookProgressView,
+  type NotebookTab,
+} from './components/NotebookProgressView';
+import {
   PracticeStudioView,
   type PracticeStudioTab,
 } from './components/PracticeStudioView';
@@ -44,6 +48,9 @@ export default function App() {
     recordQuizResult,
     recordExerciseAttempt,
     toggleExerciseNeedsReview,
+    exportStudyStateJson,
+    importStudyStateJson,
+    resetStudyProgress,
   } = useStudyState();
 
   const [book, setBook] = useState<ParsedBook | null>(null);
@@ -64,6 +71,7 @@ export default function App() {
   const [practiceInitialChapter, setPracticeInitialChapter] = useState<number | undefined>(
     undefined
   );
+  const [notebookInitialTab, setNotebookInitialTab] = useState<NotebookTab>('progress');
 
   const objectUrlsRef = useRef<string[]>([]);
 
@@ -170,6 +178,12 @@ export default function App() {
     []
   );
 
+  const handleOpenNotebook = useCallback((tab: NotebookTab = 'progress') => {
+    setNotebookInitialTab(tab);
+    setActiveView('notebook');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, []);
+
   const handleSelectView = useCallback((view: NavigationView) => {
     if (view !== 'learning-path') {
       setLearningPathUnitFilter(undefined);
@@ -180,6 +194,9 @@ export default function App() {
     if (view === 'practice') {
       setPracticeInitialTab('workbook');
       setPracticeInitialChapter(undefined);
+    }
+    if (view === 'notebook') {
+      setNotebookInitialTab('progress');
     }
     setActiveView(view);
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -252,6 +269,7 @@ export default function App() {
           onOpenLesson={handleOpenLesson}
           onOpenDialogues={() => handleOpenDialogue()}
           onOpenPractice={(tab) => handleOpenPractice(tab)}
+          onOpenNotebook={(tab) => handleOpenNotebook(tab)}
           onOpenLearningPath={handleOpenLearningPath}
           onOpenVocabularyStudio={handleOpenVocabularyStudio}
           onOpenSourceAudit={() => handleSelectView('source-audit')}
@@ -340,6 +358,29 @@ export default function App() {
         />
       )}
 
+      {activeView === 'notebook' && (
+        <NotebookProgressView
+          key={notebookInitialTab}
+          book={book}
+          exercises={bookExercises}
+          studyState={studyState}
+          initialTab={notebookInitialTab}
+          onOpenChapter={handleOpenChapter}
+          onOpenLesson={handleOpenLesson}
+          onOpenPracticeChapter={(chNum) => handleOpenPractice('workbook', chNum)}
+          onToggleChapterCompleted={toggleChapterCompleted}
+          onToggleDifficultChapter={toggleDifficultChapter}
+          onAddAnnotation={addAnnotation}
+          onUpdateAnnotation={updateAnnotation}
+          onDeleteAnnotation={deleteAnnotation}
+          onRemoveBookmark={removeBookmark}
+          onRemoveHighlight={removeHighlight}
+          onExportStudyJson={exportStudyStateJson}
+          onImportStudyJson={importStudyStateJson}
+          onResetStudyProgress={resetStudyProgress}
+        />
+      )}
+
       {activeView === 'source-audit' && (
         <SourceAuditView
           book={book}
@@ -384,7 +425,7 @@ export default function App() {
               Source: {book.metadata.title} ({book.metadata.copyright})
             </span>
             <span>
-              Stages 1–8 implemented · Next: Stage 9 Notebook &amp; Progress
+              Stages 1–9 implemented · GitHub Actions Pages Ready
             </span>
           </div>
         </footer>

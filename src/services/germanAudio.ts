@@ -138,7 +138,8 @@ export async function probeStudioTTS(force = false): Promise<boolean> {
   studioProbePromise = (async () => {
     try {
       const resp = await fetch('/api/tts/status', { method: 'GET' });
-      if (!resp.ok) {
+      const contentType = resp.headers.get('content-type') || '';
+      if (!resp.ok || !contentType.includes('application/json')) {
         studioAvailable = false;
       } else {
         const data = (await resp.json()) as { available?: boolean };

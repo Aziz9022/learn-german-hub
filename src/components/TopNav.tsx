@@ -8,6 +8,7 @@ import {
   LayoutDashboard,
   MessageCircle,
   Moon,
+  NotebookPen,
   Play,
   Sun,
 } from 'lucide-react';
@@ -23,13 +24,14 @@ interface TopNavProps {
 }
 
 const PRIMARY_NAV_ITEMS: { id: NavigationView; label: string; shortLabel: string; icon: typeof LayoutDashboard }[] = [
-  { id: 'dashboard', label: 'Dashboard', shortLabel: 'Home', icon: LayoutDashboard },
+  { id: 'dashboard', label: 'Home', shortLabel: 'Home', icon: LayoutDashboard },
   { id: 'learning-path', label: 'Path', shortLabel: 'Path', icon: Compass },
   { id: 'lessons', label: 'Lessons', shortLabel: 'Lessons', icon: GraduationCap },
   { id: 'dialogues', label: 'Dialogues', shortLabel: 'Dialogues', icon: MessageCircle },
   { id: 'practice', label: 'Practice', shortLabel: 'Practice', icon: ClipboardCheck },
-  { id: 'reader-preview', label: 'Textbook', shortLabel: 'Book', icon: BookOpen },
+  { id: 'reader-preview', label: 'Book', shortLabel: 'Book', icon: BookOpen },
   { id: 'vocabulary', label: 'Vocab', shortLabel: 'Vocab', icon: Languages },
+  { id: 'notebook', label: 'Notebook', shortLabel: 'Notes', icon: NotebookPen },
 ];
 
 export function TopNav({
@@ -64,7 +66,7 @@ export function TopNav({
                 key={item.id}
                 type="button"
                 onClick={() => onSelectView(item.id)}
-                className={`inline-flex items-center gap-1.5 border-b-2 px-2.5 py-5 text-sm font-medium whitespace-nowrap transition-colors ${
+                className={`inline-flex items-center gap-1.5 border-b-2 px-2 py-5 text-[13px] font-medium whitespace-nowrap transition-colors ${
                   isActive
                     ? 'border-[var(--color-prussian)] text-[var(--color-prussian)] dark:border-[#7AB3E6] dark:text-[#7AB3E6]'
                     : 'border-transparent text-[var(--color-ink-muted)] hover:text-[var(--color-ink)] dark:text-slate-400 dark:hover:text-[#EDEAE3]'
@@ -117,7 +119,7 @@ export function TopNav({
       {/* Tablet & Mobile Navigation Bar */}
       <nav
         aria-label="Mobile navigation"
-        className="flex border-t border-[var(--color-hairline)] lg:hidden dark:border-[var(--color-night-hairline)]"
+        className="flex overflow-x-auto border-t border-[var(--color-hairline)] lg:hidden dark:border-[var(--color-night-hairline)]"
       >
         {PRIMARY_NAV_ITEMS.map((item) => {
           const Icon = item.icon;
@@ -127,7 +129,7 @@ export function TopNav({
               key={item.id}
               type="button"
               onClick={() => onSelectView(item.id)}
-              className={`flex flex-1 flex-col items-center justify-center gap-1 py-2 text-[11px] font-medium transition-colors ${
+              className={`flex min-w-[64px] flex-1 flex-col items-center justify-center gap-1 py-2 text-[11px] font-medium transition-colors ${
                 isActive
                   ? 'text-[var(--color-prussian)] dark:text-[#7AB3E6]'
                   : 'text-[var(--color-ink-muted)] dark:text-slate-400'

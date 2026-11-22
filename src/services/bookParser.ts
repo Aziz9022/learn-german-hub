@@ -646,11 +646,23 @@ function extractChapterNodesHtml(
   };
 }
 
+function resolvePublicAssetUrl(url: string): string {
+  if (!url) return url;
+  if (/^(https?:|blob:|data:)/i.test(url)) return url;
+  const base = (import.meta.env.BASE_URL || '/').replace(/\/+$/, '/');
+  const clean = url.replace(/^\/+/, '');
+  return `${base}${clean}`;
+}
+
 /**
  * Loads and parses the bundled uploaded textbook from /public/assets/aistudio/.
+ * Automatically honors Vite BASE_URL so GitHub Pages subpath deployments resolve all 181 images.
  */
 export async function loadDefaultTextbook(): Promise<ParsedBook> {
-  const htmlResp = await fetch(assetManifest.htmlUrl);
+  const resolvedHtmlUrl = resolvePublicAssetUrl(assetManifest.htmlUrl);
+  const resolvedCssUrl = resolvePublicAssetUrl(assetManifest.cssUrl);
+
+  const htmlResp = await fetch(resolvedHtmlUrl);
   if (!htmlResp.ok) {
     throw new Error(`Failed to fetch textbook HTML (${htmlResp.status})`);
   }
@@ -658,7 +670,7 @@ export async function loadDefaultTextbook(): Promise<ParsedBook> {
 
   let cssByteSize: number | null = null;
   try {
-    const cssResp = await fetch(assetManifest.cssUrl);
+    const cssResp = await fetch(resolvedCssUrl);
     if (cssResp.ok) {
       const cssText = await cssResp.text();
       cssByteSize = new Blob([cssText]).size;
@@ -667,13 +679,18 @@ export async function loadDefaultTextbook(): Promise<ParsedBook> {
     cssByteSize = null;
   }
 
+  const resolvedImages: Record<string, string> = {};
+  for (const [key, value] of Object.entries(assetManifest.images as Record<string, string>)) {
+    resolvedImages[key] = resolvePublicAssetUrl(value);
+  }
+
   return parseBookSource({
     htmlText,
     htmlFileName: 'index.html (index_e619bc8f.html)',
     htmlByteSize: new Blob([htmlText]).size,
     cssFileName: 'style.css (style_6120f5ec.css)',
     cssByteSize,
-    imageMap: assetManifest.images as Record<string, string>,
+    imageMap: resolvedImages,
     sourceLabel: 'Bundled Source · German Made Simple (Uploaded HTML + 181 Images)',
   });
 }
