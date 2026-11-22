@@ -1,0 +1,6 @@
+{
+  "name": "German Made Simple — Interactive Learning Studio",
+  "description": "An interactive German-learning textbook and personal study environment built from German Made Simple by Arnold Leitner, Ph.D.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
